@@ -1,0 +1,9 @@
+services:
+  fastapi-admin:
+    image: registry.cn-shenzhen.aliyuncs.com/lhub/fastapi-admin:latest
+    build: .
+    container_name: fastapi-admin
+    ports:
+      - "8000:80"
+    env_file:
+      - .env
