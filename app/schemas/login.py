@@ -10,10 +10,18 @@ class CredentialsSchema(BaseModel):
 
 class JWTOut(BaseModel):
     access_token: str
+    refresh_token: str
     username: str
 
 
 class JWTPayload(BaseModel):
+    user_id: int
+    username: str
+    is_superuser: bool
+    exp: datetime
+
+
+class RefreshTokenPayload(BaseModel):
     user_id: int
     username: str
     is_superuser: bool

@@ -30,6 +30,22 @@ class AuthControl:
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"{repr(e)}")
 
+    @classmethod
+    async def is_refresh_token_valid(cls, refresh_token: str) -> Optional["User"]:
+        try:
+            decode_data = jwt.decode(refresh_token, settings.SECRET_KEY, algorithms=settings.JWT_ALGORITHM)
+            user_id = decode_data.get("user_id")
+            user = await User.filter(id=user_id).first()
+            if not user:
+                return None
+            return user
+        except jwt.DecodeError:
+            return None
+        except jwt.ExpiredSignatureError:
+            return None
+        except Exception:
+            return None
+
 
 class PermissionControl:
     @classmethod

@@ -76,6 +76,16 @@ class DeptClosure(BaseModel, TimestampMixin):
     level = fields.IntField(default=0, description="深度", index=True)
 
 
+class RefreshToken(BaseModel, TimestampMixin):
+    token = fields.CharField(max_length=512, unique=True, description="Refresh token", index=True)
+    user = fields.ForeignKeyField("models.User", related_name="refresh_tokens", description="关联用户")
+    expires_at = fields.DatetimeField(description="过期时间", index=True)
+    is_revoked = fields.BooleanField(default=False, description="是否已撤销", index=True)
+
+    class Meta:
+        table = "refresh_token"
+
+
 class AuditLog(BaseModel, TimestampMixin):
     user_id = fields.IntField(description="用户ID", index=True)
     username = fields.CharField(max_length=64, default="", description="用户名称", index=True)
