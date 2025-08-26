@@ -1,10 +1,15 @@
 import os
 import typing
+from pathlib import Path
 
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=Path(__file__).parent.parent.parent / ".env", env_file_encoding="utf-8", extra="ignore"
+    )
+
     VERSION: str = "0.1.0"
     APP_TITLE: str = "Vue FastAPI Admin"
     PROJECT_NAME: str = "Vue FastAPI Admin"
@@ -35,10 +40,10 @@ class Settings(BaseSettings):
             "engine": "tortoise.backends.mysql",
             "credentials": {
                 "host": os.getenv("DB_HOST", "10.1.20.9"),  # Database host address
-                "port": os.getenv("DB_PORT", 3306),  # Database port
+                "port": int(os.getenv("DB_PORT", 3306)),  # Database port
                 "user": os.getenv("DB_USER", "root"),  # Database username
                 "password": os.getenv("DB_PASSWORD", "mysql_fxQZsy"),  # Database password
-                "database": os.getenv("DB_NAME", "fastapi-admin"),  # Database name
+                "database": os.getenv("DB_NAME", "fastapi"),  # Database name
             },
         },
         # PostgreSQL configuration
