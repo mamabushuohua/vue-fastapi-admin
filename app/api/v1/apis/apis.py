@@ -23,7 +23,7 @@ async def list_api(
         q &= Q(summary__contains=summary)
     if tags:
         q &= Q(tags__contains=tags)
-    total, api_objs = await api_controller.list(page=page, page_size=page_size, search=q, order=["tags", "id"])
+    total, api_objs = await api_controller.list(page=page, page_size=page_size, search=q, order=["id", "tags"])
     data = [await obj.to_dict() for obj in api_objs]
     return SuccessExtra(data=data, total=total, page=page, page_size=page_size)
 

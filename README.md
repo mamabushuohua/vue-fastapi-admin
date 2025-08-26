@@ -134,6 +134,27 @@ pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
 python run.py
 ```
 
+### 自定义命令管理工具
+
+项目包含一个自定义命令管理工具，类似于Django的manage.py，可以执行各种管理任务。
+
+#### 使用方法
+
+```bash
+# 列出所有可用命令
+python manage.py --list
+
+# 执行命令
+python manage.py <command_name> [options]
+```
+
+#### 可用命令
+
+1. `reset_db` - 重置数据库
+2. `import_menu_api` - 导入菜单API
+
+有关更多详细信息，请查看 [app/commands/README.md](app/commands/README.md)。
+
 服务现在应该正在运行，访问 http://localhost:9999/docs 查看API文档
 
 #### 前端

@@ -87,6 +87,13 @@ const addAPIRules = {
 }
 
 const columns = [
+    {
+    title: 'API ID',
+    key: 'id',
+    width: 'auto',
+    align: 'center',
+    ellipsis: { tooltip: true },
+  },
   {
     title: 'API路径',
     key: 'path',

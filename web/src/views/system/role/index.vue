@@ -92,6 +92,12 @@ onMounted(() => {
 })
 
 const columns = [
+    {
+    title: '角色 ID',
+    key: 'id',
+    width: 40,
+    align: 'center',
+  },
   {
     title: '角色名',
     key: 'name',
