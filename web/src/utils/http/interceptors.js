@@ -61,6 +61,7 @@ export async function resReject(error) {
 
   // 如果是 401 错误且不是刷新 token 的请求
   if (data?.code === 401 && !config.url.includes('/base/refresh_token')) {
+
     return new Promise((resolve, reject) => {
       // 将失败的请求加入队列
       failedQueue.push({ resolve, reject })
@@ -96,7 +97,12 @@ export async function resReject(error) {
       return Promise.reject(error)
     })
   }
-
+  // 如果刷新 token 请求本身返回 401，直接登出
+  if (data?.code === 401 && config.url.includes('/base/refresh_token')) {
+    const userStore = useUserStore()
+    userStore.logout()
+    return Promise.reject({ code: 401, message: '登录已过期，请重新登录', error: data || error.response })
+  }
   // 后端返回的response数据
   const code = data?.code ?? status
   const message = resolveResError(code, data?.msg ?? error.message)
