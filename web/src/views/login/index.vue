@@ -53,7 +53,8 @@
 </template>
 
 <script setup>
-import { lStorage, setToken } from '@/utils'
+import { lStorage, setToken, TOKEN_CODE, REFRESH_TOKEN_CODE } from '@/utils'
+
 import bgImg from '@/assets/images/login_bg.webp'
 import api from '@/api'
 import { addDynamicRoutes } from '@/router'
@@ -90,7 +91,8 @@ async function handleLogin() {
     $message.loading(t('views.login.message_verifying'))
     const res = await api.login({ username, password: password.toString() })
     $message.success(t('views.login.message_login_success'))
-    setToken(res.data.access_token)
+    setToken(TOKEN_CODE, res.data.access_token)
+    setToken(REFRESH_TOKEN_CODE, res.data.refresh_token)
     await addDynamicRoutes()
     if (query.redirect) {
       const path = query.redirect

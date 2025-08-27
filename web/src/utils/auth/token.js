@@ -1,17 +1,18 @@
 import { lStorage } from '@/utils'
 
-const TOKEN_CODE = 'access_token'
+export const TOKEN_CODE = 'access_token'
+export const REFRESH_TOKEN_CODE = 'refresh_token'
 
-export function getToken() {
-  return lStorage.get(TOKEN_CODE)
+export function getToken(code) {
+  return lStorage.get(code || TOKEN_CODE)
 }
 
-export function setToken(token) {
-  lStorage.set(TOKEN_CODE, token)
+export function setToken(code, token) {
+  lStorage.set(code || TOKEN_CODE, token)
 }
 
-export function removeToken() {
-  lStorage.remove(TOKEN_CODE)
+export function removeToken(code) {
+  lStorage.remove(code || TOKEN_CODE)
 }
 
 // export async function refreshAccessToken() {
