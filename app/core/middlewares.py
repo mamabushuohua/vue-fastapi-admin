@@ -1,6 +1,6 @@
 import json
 import re
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import Any, AsyncGenerator
 
 from fastapi import FastAPI
@@ -13,6 +13,7 @@ from starlette.types import ASGIApp, Receive, Scope, Send
 from app.core.dependency import AuthControl
 from app.models.admin import AuditLog, User
 from app.tasks.token_cleanup import cleanup_expired_tokens
+from app.log import logger
 
 from .bgtask import BgTasks
 
@@ -49,7 +50,8 @@ class BackGroundTaskMiddleware(SimpleBaseMiddleware):
     async def after_request(self, request):
         # Run token cleanup every hour
         now = datetime.now()
-        if (now - self.last_cleanup).total_seconds() > 3600:  # 1 hour
+        if (now - self.last_cleanup).total_seconds() > 60:  # 1 hour
+            logger.debug("Running token cleanup")
             await BgTasks.add_task(cleanup_expired_tokens)
             self.last_cleanup = now
         await BgTasks.execute_tasks()

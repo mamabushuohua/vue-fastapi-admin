@@ -1,5 +1,4 @@
 from typing import Optional
-
 import jwt
 from fastapi import Depends, Header, HTTPException, Request
 
@@ -38,13 +37,14 @@ class AuthControl:
             user = await User.filter(id=user_id).first()
             if not user:
                 return None
+            CTX_USER_ID.set(int(user_id))
             return user
         except jwt.DecodeError:
-            return None
+            raise HTTPException(status_code=401, detail="无效的刷新令牌")
         except jwt.ExpiredSignatureError:
-            return None
-        except Exception:
-            return None
+            raise HTTPException(status_code=401, detail="刷新令牌已过期")
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"{repr(e)}")
 
 
 class PermissionControl:

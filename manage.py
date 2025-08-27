@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import argparse
-import asyncio
 import os
 import sys
 from pathlib import Path
@@ -34,12 +33,8 @@ def main():
     # Parse command line arguments
     parser = argparse.ArgumentParser(description="Custom command management tool.")
     parser.add_argument("command", nargs="?", help="The command to execute")
-    parser.add_argument(
-        "--list", action="store_true", help="List all available commands"
-    )
-    parser.add_argument(
-        "args", nargs=argparse.REMAINDER, help="Arguments for the command"
-    )
+    parser.add_argument("--list", action="store_true", help="List all available commands")
+    parser.add_argument("args", nargs=argparse.REMAINDER, help="Arguments for the command")
 
     args = parser.parse_args()
 

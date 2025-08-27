@@ -1,13 +1,6 @@
-import argparse
 import asyncio
-import os
-import sys
 
-import aiomysql
-import pymysql
 from tortoise import Tortoise
-from tortoise.backends.mysql.client import MySQLClient
-from tortoise.exceptions import DBConnectionError
 
 from app.commands.base import BaseCommand
 from app.core.init_app import init_data, init_db
@@ -37,18 +30,20 @@ class ResetDBCommand(BaseCommand):
 
     async def reset_db(self):
         # Handle different database types
-        if settings.DB_TYPE == "mysql":
-            await self._reset_mysql_db()
-        else:
-            # For SQLite and others, use the existing approach
-            await Tortoise.init(config=settings.TORTOISE_ORM)
-            await Tortoise._drop_databases()
-            await init_db()
+        # await Tortoise.init(config=settings.TORTOISE_ORM)
+        # if settings.DB_TYPE == "mysql":
 
-        # Reinitialize Tortoise with fresh connection
-        await Tortoise.init(config=settings.TORTOISE_ORM)
+        #     await Tortoise.generate_schemas(safe=False)
 
-        # Initialize data
-        await init_data()
+        # else:
+        #     # For SQLite and others, use the existing approach
+        #     # await Tortoise.init(config=settings.TORTOISE_ORM)
+        #     await Tortoise._drop_databases()
+
+        # # Reinitialize Tortoise with fresh connection
+
+        # # Initialize data
+        # # await init_data()
+        # await Tortoise.close_connections()
 
         print("Database has been reset successfully.")
