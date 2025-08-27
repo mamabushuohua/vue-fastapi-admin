@@ -1,10 +1,6 @@
 import asyncio
 
-from tortoise import Tortoise
-
 from app.commands.base import BaseCommand
-from app.core.init_app import init_data, init_db
-from app.settings.config import settings
 
 
 class ResetDBCommand(BaseCommand):

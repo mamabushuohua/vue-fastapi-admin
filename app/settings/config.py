@@ -28,8 +28,15 @@ class Settings(BaseSettings):
     SECRET_KEY: str = "3488a63e1765035d386f05409663f55c83bfae3b3c61a932744b20ad14244dcf"  # openssl rand -hex 32
     JWT_ALGORITHM: str = "HS256"
     JWT_ACCESS_TOKEN_EXPIRE_MINUTES: int = 1  # 1 minute
-    JWT_REFRESH_TOKEN_EXPIRE_MINUTES: int = 2  # 5 minutes
+    JWT_REFRESH_TOKEN_EXPIRE_MINUTES: int = 5  # 2 minutes
     DB_TYPE: str = os.getenv("DB_TYPE", "sqlite")
+
+    # Redis配置
+    REDIS_HOST: str = os.getenv("REDIS_HOST", "localhost")
+    REDIS_PORT: int = int(os.getenv("REDIS_PORT", 6379))
+    REDIS_DB: int = int(os.getenv("REDIS_DB", 8))
+    REDIS_PASSWORD: str = os.getenv("REDIS_PASSWORD", "")
+
     DB_CONNECTIONS: dict = {
         "sqlite": {
             "engine": "tortoise.backends.sqlite",

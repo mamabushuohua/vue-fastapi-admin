@@ -10,6 +10,7 @@ from app.core.init_app import (
     register_exceptions,
     register_routers,
 )
+from app.core.redis import init_redis, close_redis
 
 try:
     from app.settings.config import settings
@@ -20,8 +21,10 @@ except ImportError:
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await init_data()
+    await init_redis()
     yield
     await Tortoise.close_connections()
+    await close_redis()
 
 
 def create_app() -> FastAPI:

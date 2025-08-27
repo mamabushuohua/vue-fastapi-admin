@@ -1,17 +1,21 @@
-from datetime import datetime, timedelta, timezone
-
-from fastapi import APIRouter
+import jwt
+from fastapi import APIRouter, Header
 
 from app.controllers.user import user_controller
 from app.core.ctx import CTX_USER_ID
 from app.core.dependency import DependAuth
-from app.models.admin import Api, Menu, Role, User, RefreshToken
+from app.models.admin import Api, Menu, Role, User
 from app.schemas.base import Fail, Success
 from app.schemas.login import CredentialsSchema, JWTOut
 from app.schemas.users import UpdatePassword
 from app.settings import settings
 from app.utils.jwt_utils import create_tokens
 from app.utils.password import get_password_hash, verify_password
+from app.utils.token_utils import (
+    store_token_in_redis,
+    validate_refresh_token_from_redis,
+    revoke_all_user_tokens_in_redis,
+)
 
 router = APIRouter()
 
@@ -24,10 +28,14 @@ async def login_access_token(credentials: CredentialsSchema):
     # Create both access and refresh tokens
     access_token, refresh_token = create_tokens(user_id=user.id, username=user.username, is_superuser=user.is_superuser)
 
-    # Store refresh token in database
-    # Use the same expiration time as in the JWT token
-    expires_at = datetime.now(timezone.utc) + timedelta(minutes=settings.JWT_REFRESH_TOKEN_EXPIRE_MINUTES)
-    await RefreshToken.create(token=refresh_token, user=user, expires_at=expires_at)
+    # Store tokens in Redis
+    await store_token_in_redis(
+        user_id=user.id,
+        access_token=access_token,
+        refresh_token=refresh_token,
+        username=user.username,
+        is_superuser=user.is_superuser,
+    )
 
     data = JWTOut(
         access_token=access_token,
@@ -94,53 +102,62 @@ async def get_user_api():
 @router.post("/refresh_token", summary="刷新token")
 async def refresh_access_token(refresh_token: str):
     try:
-
-        # Get the refresh token object from database
-        refresh_token_obj = await RefreshToken.filter(token=refresh_token, is_revoked=False).first()
-        if not refresh_token_obj:
+        # Validate refresh token from Redis
+        token_data = await validate_refresh_token_from_redis(refresh_token)
+        if not token_data:
             return Fail(code=401, msg="无效的刷新令牌")
 
-        # Use the existing is_refresh_token_valid function to validate the refresh token
-        from app.core.dependency import AuthControl
+        user_id = token_data["user_id"]
+        username = token_data["username"]
+        is_superuser = token_data["is_superuser"]
 
-        user = await AuthControl.is_refresh_token_valid(refresh_token)
-
+        # Get user from database
+        user = await User.filter(id=user_id).first()
         if not user:
-            return Fail(code=401, msg="非法的用户刷新令牌")
-        # # Mark current refresh token as revoked
-        # refresh_token_obj.is_revoked = True
-        # await refresh_token_obj.save()
+            return Fail(code=401, msg="用户不存在")
 
         # Create new access and refresh tokens
         new_access_token, new_refresh_token = create_tokens(
-            user_id=user.id, username=user.username, is_superuser=user.is_superuser
+            user_id=user.id, username=username, is_superuser=is_superuser
         )
 
-        # Store new refresh token in database
-        expires_at = datetime.now(timezone.utc) + timedelta(minutes=settings.JWT_REFRESH_TOKEN_EXPIRE_MINUTES)
-        await RefreshToken.create(token=new_refresh_token, user=user, expires_at=expires_at)
+        # Store new tokens in Redis
+        await store_token_in_redis(
+            user_id=user.id,
+            access_token=new_access_token,
+            refresh_token=new_refresh_token,
+            username=username,
+            is_superuser=is_superuser,
+        )
 
         data = JWTOut(
             access_token=new_access_token,
             refresh_token=new_refresh_token,
-            username=user.username,
+            username=username,
         )
         return Success(data=data.model_dump())
+    except jwt.ExpiredSignatureError:
+        return Fail(code=401, msg="刷新令牌已过期")
+    except jwt.DecodeError:
+        return Fail(code=401, msg="无效的刷新令牌")
     except Exception as e:
-        refresh_token_obj.is_revoked = True
-        await refresh_token_obj.save()
-        # Handle specific JWT exceptions
-        return Fail(code=401, msg=f"{repr(e)}")
+        return Fail(code=500, msg=f"刷新令牌处理失败: {str(e)}")
 
 
 @router.post("/logout", summary="登出", dependencies=[DependAuth])
-async def logout(refresh_token: str):
+async def logout(token: str = Header(..., description="access token")):
     try:
-        # Mark refresh token as revoked
-        refresh_token_obj = await RefreshToken.filter(token=refresh_token).first()
-        if refresh_token_obj:
-            refresh_token_obj.is_revoked = True
-            await refresh_token_obj.save()
+        # Get user ID from token
+        try:
+            decode_data = jwt.decode(token, settings.SECRET_KEY, algorithms=settings.JWT_ALGORITHM)
+            user_id = decode_data.get("user_id")
+        except jwt.DecodeError:
+            return Fail(code=401, msg="无效的访问令牌")
+        except jwt.ExpiredSignatureError:
+            return Fail(code=401, msg="访问令牌已过期")
+
+        # Revoke all user tokens in Redis
+        await revoke_all_user_tokens_in_redis(user_id)
 
         return Success(msg="登出成功")
     except Exception as e:
@@ -156,4 +173,8 @@ async def update_user_password(req_in: UpdatePassword):
         return Fail(msg="旧密码验证错误！")
     user.password = get_password_hash(req_in.new_password)
     await user.save()
+
+    # Revoke all user tokens when password is changed for security
+    await revoke_all_user_tokens_in_redis(user_id)
+
     return Success(msg="修改成功")

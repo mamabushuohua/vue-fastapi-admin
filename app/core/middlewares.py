@@ -50,7 +50,7 @@ class BackGroundTaskMiddleware(SimpleBaseMiddleware):
     async def after_request(self, request):
         # Run token cleanup every hour
         now = datetime.now()
-        if (now - self.last_cleanup).total_seconds() > 60:  # 1 hour
+        if (now - self.last_cleanup).total_seconds() > 600:  # 1 minute for testing
             logger.debug("Running token cleanup")
             await BgTasks.add_task(cleanup_expired_tokens)
             self.last_cleanup = now
