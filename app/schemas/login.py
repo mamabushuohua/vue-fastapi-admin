@@ -26,3 +26,7 @@ class RefreshTokenPayload(BaseModel):
     username: str
     is_superuser: bool
     exp: datetime
+
+
+class RefreshTokenRequest(BaseModel):
+    refresh_token: str

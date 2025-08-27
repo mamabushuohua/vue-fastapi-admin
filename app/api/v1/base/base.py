@@ -6,7 +6,7 @@ from app.core.ctx import CTX_USER_ID
 from app.core.dependency import DependAuth
 from app.models.admin import Api, Menu, Role, User
 from app.schemas.base import Fail, Success
-from app.schemas.login import CredentialsSchema, JWTOut
+from app.schemas.login import CredentialsSchema, JWTOut, RefreshTokenRequest
 from app.schemas.users import UpdatePassword
 from app.settings import settings
 from app.utils.jwt_utils import create_tokens
@@ -100,10 +100,10 @@ async def get_user_api():
 
 
 @router.post("/refresh_token", summary="刷新token")
-async def refresh_access_token(refresh_token: str):
+async def refresh_access_token(request: RefreshTokenRequest):
     try:
         # Validate refresh token from Redis
-        token_data = await validate_refresh_token_from_redis(refresh_token)
+        token_data = await validate_refresh_token_from_redis(request.refresh_token)
         if not token_data:
             return Fail(code=401, msg="无效的刷新令牌")
 
