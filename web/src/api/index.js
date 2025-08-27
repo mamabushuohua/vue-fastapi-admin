@@ -2,6 +2,8 @@ import { request } from '@/utils'
 
 export default {
   login: (data) => request.post('/base/access_token', data, { noNeedToken: true }),
+  refreshToken: (refreshToken) => request.post('/base/refresh_token', { refresh_token: refreshToken }, { noNeedToken: true }),
+  logout: () => request.post('/base/logout'),
   getUserInfo: () => request.get('/base/userinfo'),
   getUserMenu: () => request.get('/base/usermenu'),
   getUserApi: () => request.get('/base/userapi'),

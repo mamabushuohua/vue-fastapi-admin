@@ -1,4 +1,5 @@
 import { lStorage } from '@/utils'
+import api from '@/api'
 
 export const TOKEN_CODE = 'access_token'
 export const REFRESH_TOKEN_CODE = 'refresh_token'
@@ -30,3 +31,31 @@ export function removeToken(code) {
 //     console.error(error)
 //   }
 // }
+
+
+export async function refreshAccessToken() {
+  const refreshToken = getToken(REFRESH_TOKEN_CODE)
+  if (!refreshToken) {
+    return null
+  }
+
+  try {
+    const res = await api.refreshToken(refreshToken)
+    if (res.code === 200) {
+      setToken(TOKEN_CODE, res.data.access_token)
+      setToken(REFRESH_TOKEN_CODE, res.data.refresh_token)
+      return res.data.access_token
+    } else {
+      // Refresh token 失效，清除所有 token
+      removeToken(TOKEN_CODE)
+      removeToken(REFRESH_TOKEN_CODE)
+      return null
+    }
+  } catch (error) {
+    console.error('Failed to refresh access token:', error)
+    // Refresh token 失效，清除所有 token
+    removeToken(TOKEN_CODE)
+    removeToken(REFRESH_TOKEN_CODE)
+    return null
+  }
+}
