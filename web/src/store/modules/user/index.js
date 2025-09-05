@@ -1,8 +1,10 @@
 import { defineStore } from 'pinia'
 import { resetRouter } from '@/router'
 import { useTagsStore, usePermissionStore } from '@/store'
-import { removeToken, toLogin } from '@/utils'
+import { removeToken, toLogin, getToken } from '@/utils'
 import api from '@/api'
+
+import { TOKEN_CODE, REFRESH_TOKEN_CODE } from '@/utils/auth/token'
 
 export const useUserStore = defineStore('user', {
   state() {
@@ -47,11 +49,25 @@ export const useUserStore = defineStore('user', {
       } catch (error) {
         return error
       }
-    },
-    async logout() {
+    }, async logout() {
       const { resetTags } = useTagsStore()
       const { resetPermission } = usePermissionStore()
-      removeToken()
+
+      // 调用后端登出接口
+      try {
+        const token = getToken(TOKEN_CODE)
+        if (token) {
+          await api.logout({ token })
+        }
+      } catch (error) {
+        console.error('Logout API error:', error)
+      }
+
+      // 清除本地 token
+      removeToken(TOKEN_CODE)
+      removeToken(REFRESH_TOKEN_CODE)
+
+      // 重置状态
       resetTags()
       resetPermission()
       resetRouter()

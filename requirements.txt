@@ -41,6 +41,7 @@ pyjwt==2.10.1
 pypika-tortoise==0.3.2
 python-dotenv==1.0.1
 python-multipart==0.0.20
+python-gitlab==6.3.0
 pytz==2024.2
 pyyaml==6.0.2
 rich==13.9.4

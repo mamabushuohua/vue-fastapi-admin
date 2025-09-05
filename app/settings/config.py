@@ -37,6 +37,10 @@ class Settings(BaseSettings):
     REDIS_DB: int = int(os.getenv("REDIS_DB", 8))
     REDIS_PASSWORD: str = os.getenv("REDIS_PASSWORD", "")
 
+    # GitLab配置
+    GITLAB_URL: str = os.getenv("GITLAB_URL", "https://gitlab.com")
+    GITLAB_TOKEN: str = os.getenv("GITLAB_TOKEN", "")
+
     DB_CONNECTIONS: dict = {
         "sqlite": {
             "engine": "tortoise.backends.sqlite",

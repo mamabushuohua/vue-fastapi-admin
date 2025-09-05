@@ -41,4 +41,10 @@ export default {
   deleteDept: (params = {}) => request.delete('/dept/delete', { params }),
   // auditlog
   getAuditLogList: (params = {}) => request.get('/auditlog/list', { params }),
+  // gitlab
+  getGitLabProjects: (params = {}) => request.get('/gitlab/projects', { params }),
+  getGitLabProjectDetails: (projectId) => request.get(`/gitlab/projects/${projectId}`),
+  getGitLabProjectTags: (projectId) => request.get(`/gitlab/projects/${projectId}/tags`),
+  getGitLabProjectCommits: (projectId, params = {}) => request.get(`/gitlab/projects/${projectId}/commits`, { params }),
+  getGitLabProjectPipelines: (projectId, params = {}) => request.get(`/gitlab/projects/${projectId}/pipelines`, { params }),
 }

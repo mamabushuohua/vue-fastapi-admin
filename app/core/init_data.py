@@ -1,7 +1,7 @@
 """
 Author        yongfa
 Date          2025-08-26 17:43:36
-LastEditTime  2025-08-26 19:07:24
+LastEditTime  2025-08-28 18:12:10
 LastEditors   yongfa
 Description   初始化数据
 """
@@ -13,6 +13,7 @@ from app.controllers.user import UserCreate, user_controller
 from app.models.admin import Api, Menu, Role, Dept
 from app.schemas.menus import MenuType
 from app.log import logger
+from app.settings import settings
 
 
 async def init_superuser():
@@ -136,6 +137,52 @@ async def init_menus():
             "component": "/gitlab",
             "keepalive": False,
             "redirect": "",
+            "children": [
+                {
+                    "menu_type": MenuType.MENU,
+                    "name": "tags",
+                    "path": "tags",
+                    "order": 10,
+                    "parent_id": None,
+                    "icon": "material-symbols:featured-play-list-outline",
+                    "is_hidden": False,
+                    "component": "/gitlab/tags",
+                    "keepalive": False,
+                },
+                {
+                    "menu_type": MenuType.MENU,
+                    "name": "projects",
+                    "path": "projects",
+                    "order": 9,
+                    "parent_id": None,
+                    "icon": "material-symbols:featured-play-list-outline",
+                    "is_hidden": False,
+                    "component": "/gitlab/projects",
+                    "keepalive": False,
+                },
+                {
+                    "menu_type": MenuType.MENU,
+                    "name": "commits",
+                    "path": "commits",
+                    "order": 10,
+                    "parent_id": None,
+                    "icon": "material-symbols:featured-play-list-outline",
+                    "is_hidden": False,
+                    "component": "/gitlab/commits",
+                    "keepalive": False,
+                },
+                {
+                    "menu_type": MenuType.MENU,
+                    "name": "pipelines",
+                    "path": "pipelines",
+                    "order": 10,
+                    "parent_id": None,
+                    "icon": "material-symbols:featured-play-list-outline",
+                    "is_hidden": False,
+                    "component": "/gitlab/pipelines",
+                    "keepalive": False,
+                },
+            ],
         },
     ]
 
@@ -165,6 +212,9 @@ async def init_menus():
     if not roles:
         logger.debug("初始化首次菜单...")
         await handle_menus(menus_data)
+    # if settings.DEBUG:
+    #     logger.debug("初始化菜单...")
+    #     await handle_menus(menus_data)
 
 
 async def init_apis():

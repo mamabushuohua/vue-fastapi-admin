@@ -1,4 +1,6 @@
 import uvicorn
+
+# from aliyun.opentelemetry.instrumentation.auto_instrumentation import sitecustomize
 from uvicorn.config import LOGGING_CONFIG
 
 if __name__ == "__main__":
